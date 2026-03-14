@@ -1,7 +1,7 @@
 const TelegramBot = require('node-telegram-bot-api');
 const axios = require('axios');
 
-const token = const token = process.env.BOT_TOKEN;
+const token = process.env.BOT_TOKEN;
 const API_URL = "https://felina-backend-production.up.railway.app";
 const bot = new TelegramBot(token, { polling: true });
 
