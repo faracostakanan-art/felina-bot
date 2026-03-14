@@ -28,7 +28,7 @@ const mainMenu = {
 bot.onText(/\/start/, (msg) => {
   bot.sendMessage(
     msg.chat.id,
-    "👋 Bienvenue !\n🔒 Connexion sécurisée activée.\n\nSélectionnez une option :",
+    "👋 Bienvenue sur Felina LOG&cc !\n🔒 Connexion sécurisée activée.\n\nSélectionnez une option :",
     { reply_markup: mainMenu }
   );
 });
