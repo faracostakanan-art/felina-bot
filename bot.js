@@ -123,7 +123,7 @@ bot.on("message", async (msg) => {
       break;
 
     case "📞 Support":
-      bot.sendMessage(chatId, "Contacte le support : @malusaint ");
+      bot.sendMessage(chatId, "Contacte le support : @R0BESS ");
       break;
 
     default:
