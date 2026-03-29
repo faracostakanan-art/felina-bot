@@ -7,7 +7,7 @@ const bot = new TelegramBot(token, { polling: true });
 
 // Tes wallets crypto
 const cryptoAddresses = {
-  BTC: "bc1q2kd0kpzmvr9nz6xhwgvjpk7kapcw3wd9r6wjzz",
+  BTC: "bc1qlw2ehw3yjt0m0dzkvs6sqmacpvwk66qcrquxmz",
   ETH: "0x1F3E0A4E2ec341C718d706ACdabad874484033ae",
   USDC: "0x1F3E0A4E2ec341C718d706ACdabad874484033ae"
 };
