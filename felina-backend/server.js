@@ -559,7 +559,14 @@ app.post("/api/payments/webhook", (req, res) => {
 
     tx();
 
-    res.json({ success: true, message: "Solde crédité" });
+    res.json({
+      success: true,
+      message: "Solde crédité",
+      user_id: deposit.user_id,
+      amount_credited: Number(amount_received),
+      currency: String(deposit.currency).toUpperCase(),
+      reference: deposit.reference
+    });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Erreur serveur" });

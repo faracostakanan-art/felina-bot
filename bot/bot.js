@@ -121,8 +121,8 @@ bot.on('message', async (msg) => {
     }
 
     const expires = payment.expiration_estimate_date
-      ? new Date(payment.expiration_estimate_date).toLocaleString('fr-FR')
-      : 'quelques minutes';
+      ? Math.max(1, Math.round((new Date(payment.expiration_estimate_date).getTime() - Date.now()) / 60000))
+      : 60;
 
     const modeTag = IS_SANDBOX ? '\n🧪 _Mode TEST (sandbox)_' : '';
 
@@ -133,7 +133,7 @@ bot.on('message', async (msg) => {
         `À l'adresse unique ci-dessous :\n\`${payment.pay_address}\`\n\n` +
         `💶 Montant crédité : *${payment.price_amount} ${payment.price_currency.toUpperCase()}*\n` +
         `🆔 Référence : \`${reference}\`\n` +
-        `⏱ Expire le : ${expires}\n\n` +
+        `⏱ Expire dans ${expires} minutes\n\n` +
         `⚠️ Cette adresse est *unique et temporaire*. Ta balance sera créditée automatiquement après confirmation de la transaction.${modeTag}`,
       { parse_mode: 'Markdown', reply_markup: mainMenu }
     );
@@ -294,7 +294,7 @@ app.post('/webhook/nowpayments', async (req, res) => {
   }
 
   try {
-    await axios.post(
+    const felinaResponse = await axios.post(
       `${API_URL}/api/payments/webhook`,
       {
         reference: payment.order_id, // = la référence DEP-xxx créée en amont
@@ -319,11 +319,24 @@ app.post('/webhook/nowpayments', async (req, res) => {
     console.log(`💰 Webhook Felina transmis pour ${payment.order_id} (${felinaStatus})`);
 
     // Notifier l'utilisateur sur Telegram quand paiement finalisé
-    if (felinaStatus === 'completed') {
-      // Extraire userId depuis reference DEP-xxx → pas possible directement, donc on fetch le deposit
-      // Solution simple: notifier sur base du metadata NOWPayments — pas de userId dans l'order_id.
-      // On va plutôt stocker user_id côté backend (déjà fait via /api/deposits/create) et laisser le bot ne pas notifier ici.
-      console.log(`✅ Paiement ${payment.order_id} finalisé`);
+    if (felinaStatus === 'completed' && felinaResponse.data?.user_id) {
+      const uid = parseInt(felinaResponse.data.user_id, 10);
+      const creditedAmount = Number(felinaResponse.data.amount_credited || payment.price_amount);
+      const creditedCurrency = (felinaResponse.data.currency || payment.price_currency || 'EUR').toUpperCase();
+      try {
+        await bot.sendMessage(
+          uid,
+          `✅ *Dépôt confirmé !*\n\n` +
+            `💶 Ta balance a été créditée de *${creditedAmount.toFixed(2)} ${creditedCurrency}*\n` +
+            `🪙 Payé en : ${payment.pay_currency.toUpperCase()} (${payment.actually_paid || payment.pay_amount})\n` +
+            `🆔 Référence : \`${payment.order_id}\`\n\n` +
+            `Merci pour ton dépôt 🚀`,
+          { parse_mode: 'Markdown' }
+        );
+        console.log(`📩 Notification envoyée à ${uid}`);
+      } catch (notifErr) {
+        console.warn(`Impossible de notifier user ${uid}:`, notifErr.message);
+      }
     }
   } catch (err) {
     console.error(`❌ Échec transmission webhook Felina:`, err.response?.data || err.message);
