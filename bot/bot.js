@@ -148,7 +148,7 @@ bot.on('message', async (msg) => {
             [
               {
                 text: '🛒 Ouvrir la boutique',
-                web_app: { url: 'https://el-felina.vercel.app' },
+                web_app: { url: 'https://atlas-web-production-4b44.up.railway.app' },
               },
             ],
           ],
